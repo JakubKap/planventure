@@ -3,6 +3,7 @@ from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db
+from utils import create_password_hash, verify_password_hash
 
 
 class User(db.Model):
@@ -22,11 +23,25 @@ class User(db.Model):
     # Relationship to trips
     trips = db.relationship('Trip', backref='user', lazy=True)
 
-    def set_password(self, password: str) -> None:
-        self.password_hash = generate_password_hash(password)
+    def set_password(self, password: str, method: str = 'werkzeug') -> None:
+        """Set the user's password hash using the specified method.
+
+        Args:
+            password: The plain text password
+            method: Hashing method ('werkzeug' or 'pbkdf2')
+        """
+        self.password_hash = create_password_hash(password, method)
 
     def check_password(self, password: str) -> bool:
-        return check_password_hash(self.password_hash, password)
+        """Verify a password against the stored hash.
+
+        Args:
+            password: The plain text password to verify
+
+        Returns:
+            True if password matches, False otherwise
+        """
+        return verify_password_hash(password, self.password_hash)
 
     def to_dict(self) -> dict:
         return {

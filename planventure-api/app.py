@@ -4,7 +4,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 
 from config import Config
-from extensions import db
+from extensions import db, jwt
 from models import User
 
 
@@ -14,6 +14,7 @@ def create_app():
 
     CORS(app)
     db.init_app(app)
+    jwt.init_app(app)
 
     @app.route('/')
     def home():
