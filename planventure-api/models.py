@@ -21,7 +21,7 @@ class User(db.Model):
     )
 
     # Relationship to trips
-    trips = db.relationship('Trip', backref='user', lazy=True)
+    trips = db.relationship('Trip', back_populates='user', lazy=True)
 
     def set_password(self, password: str, method: str = 'werkzeug') -> None:
         """Set the user's password hash using the specified method.
@@ -74,7 +74,7 @@ class Trip(db.Model):
     )
 
     # Relationship back to user
-    user = db.relationship('User', backref=db.backref('trips', lazy=True))
+    user = db.relationship('User', back_populates='trips')
 
     def to_dict(self) -> dict:
         return {
