@@ -5,6 +5,7 @@ from flask import Blueprint, jsonify, request
 
 from auth_middleware import require_auth, get_current_user
 from extensions import db
+from itinerary import generate_itinerary_template, quick_itinerary_template
 from models import Trip
 
 trips_bp = Blueprint('trips', __name__)
@@ -63,6 +64,7 @@ def create_trip():
     destination = payload.get('destination', '').strip()
     coordinates = payload.get('coordinates', '').strip()
     itinerary = payload.get('itinerary', '')
+    auto_generate_itinerary = payload.get('auto_generate_itinerary', False)
 
     # Validate destination
     if not destination:
@@ -80,6 +82,14 @@ def create_trip():
     # Validate date logic
     if end_date <= start_date:
         return jsonify({'error': 'End date must be after start date.'}), 400
+
+    # Auto-generate itinerary if requested and not provided
+    if auto_generate_itinerary and not itinerary:
+        itinerary = generate_itinerary_template(
+            destination,
+            payload['start_date'],
+            payload['end_date']
+        )
 
     # Create trip
     trip = Trip(

@@ -40,6 +40,27 @@ This directory contains example JSON payloads for testing the Trip CRUD operatio
 }
 ```
 
+### With Auto-Generated Itinerary
+**File**: `example_trip_auto_itinerary.json`
+
+Set `"auto_generate_itinerary": true` to automatically generate a markdown-formatted itinerary template based on your trip dates and destination.
+
+```json
+{
+  "destination": "Barcelona, Spain",
+  "start_date": "2024-08-10T09:00:00Z",
+  "end_date": "2024-08-15T18:00:00Z",
+  "coordinates": "41.3851,2.1734",
+  "auto_generate_itinerary": true
+}
+```
+
+The generated itinerary will include:
+- Trip title with destination
+- Duration and date range
+- Daily sections with Morning, Afternoon, and Evening time blocks
+- Notes section for additional information
+
 ## GET Trip by ID Examples
 
 ### Fetch Trip with ID 1
@@ -134,6 +155,7 @@ curl -X GET http://127.0.0.1:5000/trips/999 \
 - **end_date** (required): ISO 8601 datetime string, must be after start_date
 - **coordinates** (optional): String, typically "lat,lng" format
 - **itinerary** (optional): String, can contain multi-line text
+- **auto_generate_itinerary** (optional): Boolean, if true and itinerary is not provided, automatically generates a markdown itinerary template (default: false)
 
 ## Expected Response
 
