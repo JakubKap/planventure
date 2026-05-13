@@ -7,11 +7,14 @@ import NewTripPage from '../pages/NewTripPage';
 import TripDetailsPage from '../pages/TripDetailsPage';
 import EditTripPage from '../pages/EditTripPage';
 
-export const publicRoutes = [
+export const homeRoutes = [
   {
     path: '/',
     element: <Home />,
-  },
+  }
+];
+
+export const authRoutes = [
   {
     path: '/login',
     element: <LoginPage />,
