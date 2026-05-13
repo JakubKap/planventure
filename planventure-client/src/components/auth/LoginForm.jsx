@@ -7,11 +7,15 @@ import {
   Typography, 
   Alert,
   InputAdornment,
-  IconButton
+  IconButton,
+  FormControlLabel,
+  Checkbox,
+  Link,
+  CircularProgress
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/api';
+import { authService } from '../../services/authService';
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -22,7 +26,8 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   });
   const [formErrors, setFormErrors] = useState({
     email: '',
@@ -53,22 +58,23 @@ const LoginForm = () => {
 
   const validatePassword = (password) => {
     if (!password) return 'Password is required';
-    if (password.length < 6) return 'Password must be at least 6 characters';
     return '';
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
     
-    // Clear errors when user types
-    setFormErrors(prev => ({
-      ...prev,
-      [name]: ''
-    }));
+    // Clear errors when user types (only for text fields)
+    if (type !== 'checkbox') {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -90,7 +96,7 @@ const LoginForm = () => {
     setError('');
 
     try {
-      const response = await api.auth.login(formData);
+      const response = await authService.login(formData);
       console.log('Login response:', response);
 
       if (response.token) {
@@ -112,19 +118,31 @@ const LoginForm = () => {
     setShowPassword(!showPassword);
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !isLoading) {
+      handleSubmit(e);
+    }
+  };
+
   return (
     <Box
       component="form"
       onSubmit={handleSubmit}
+      onKeyPress={handleKeyPress}
       sx={{
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
         gap: 2
       }}
+      role="form"
+      aria-label="Login form"
     >
-      <Typography variant="h5" component="h1" gutterBottom textAlign="center">
-        Login to Planventure
+      <Typography variant="h5" component="h1" gutterBottom textAlign="center" sx={{ mb: 1 }}>
+        Welcome Back
+      </Typography>
+      <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mb: 3 }}>
+        Sign in to your Planventure account
       </Typography>
 
       {successMessage && (
@@ -150,6 +168,11 @@ const LoginForm = () => {
         helperText={formErrors.email}
         disabled={isLoading}
         required
+        autoComplete="email"
+        autoFocus
+        inputProps={{
+          'aria-describedby': formErrors.email ? 'email-error' : undefined
+        }}
       />
 
       <TextField
@@ -163,13 +186,18 @@ const LoginForm = () => {
         helperText={formErrors.password}
         disabled={isLoading}
         required
+        autoComplete="current-password"
+        inputProps={{
+          'aria-describedby': formErrors.password ? 'password-error' : undefined
+        }}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
               <IconButton
-                aria-label="toggle password visibility"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
                 onClick={togglePasswordVisibility}
                 edge="end"
+                disabled={isLoading}
               >
                 {showPassword ? <VisibilityOff /> : <Visibility />}
               </IconButton>
@@ -178,22 +206,55 @@ const LoginForm = () => {
         }}
       />
 
+      <FormControlLabel
+        control={
+          <Checkbox
+            name="rememberMe"
+            checked={formData.rememberMe}
+            onChange={handleChange}
+            color="primary"
+          />
+        }
+        label="Remember me"
+        sx={{ alignSelf: 'flex-start' }}
+      />
+
       <Button
         type="submit"
         variant="contained"
         color="primary"
         size="large"
         disabled={isLoading}
-        sx={{ mt: 2 }}
+        sx={{ mt: 2, position: 'relative' }}
+        startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
       >
-        {isLoading ? 'Logging in...' : 'Login'}
+        {isLoading ? 'Signing in...' : 'Sign In'}
       </Button>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+        <Link
+          component="button"
+          variant="body2"
+          onClick={() => navigate('/forgot-password')}
+          sx={{ textDecoration: 'none' }}
+        >
+          Forgot password?
+        </Link>
+      </Box>
 
       <Typography variant="body2" textAlign="center" sx={{ mt: 2 }}>
         Don't have an account?{' '}
-        <Button onClick={() => navigate('/signup')} stx={{ testTransform: 'none' }}>
+        <Link
+          component="button"
+          onClick={() => navigate('/signup')}
+          sx={{
+            textDecoration: 'none',
+            fontWeight: 500,
+            '&:hover': { textDecoration: 'underline' }
+          }}
+        >
           Sign up
-        </Button>
+        </Link>
       </Typography>
     </Box>
   );
