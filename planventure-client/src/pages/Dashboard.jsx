@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Grid, Paper, Button } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import TripList from '../components/trips/TripList';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import travelingSvg from '../assets/undraw_traveling_yhxq.svg';
 
 const Dashboard = () => {
