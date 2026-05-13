@@ -1,22 +1,21 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Box, 
-  TextField, 
-  Button, 
-  Typography, 
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
   Alert,
   InputAdornment,
-  IconButton
+  IconButton,
+  Link as MuiLink,
+  CircularProgress
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useAuth } from '../../context/AuthContext';
-import { Link as RouterLink } from 'react-router-dom';
-import { api } from '../../services/api';
+import { authService } from '../../services/authService';
 
 const SignupForm = () => {
   const navigate = useNavigate();
-  const { setIsAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -52,12 +51,11 @@ const SignupForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }));
-    
-    setFormErrors(prev => ({
+    setFormErrors((prev) => ({
       ...prev,
       [name]: ''
     }));
@@ -65,15 +63,14 @@ const SignupForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate form
+
     const emailError = validateEmail(formData.email);
     const passwordError = validatePassword(formData.password);
     const confirmPasswordError = validateConfirmPassword(
-      formData.confirmPassword, 
+      formData.confirmPassword,
       formData.password
     );
-    
+
     if (emailError || passwordError || confirmPasswordError) {
       setFormErrors({
         email: emailError,
@@ -87,25 +84,20 @@ const SignupForm = () => {
     setError('');
 
     try {
-      const userData = {
+      await authService.register({
         email: formData.email,
         password: formData.password
-      };
+      });
 
-      const response = await api.auth.register(userData);
-      console.log('Signup response:', response); // Debug log
-      
-      // Don't check for accessToken, just redirect after successful registration
-      navigate('/login', { 
+      navigate('/login', {
         replace: true,
-        state: { 
+        state: {
           message: 'Registration successful! Please log in.',
           email: formData.email
         }
       });
-      
     } catch (err) {
-      console.error('Signup error:', err); // Debug log
+      console.error('Signup error:', err);
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -113,7 +105,7 @@ const SignupForm = () => {
   };
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+    setShowPassword((prev) => !prev);
   };
 
   return (
@@ -126,9 +118,14 @@ const SignupForm = () => {
         flexDirection: 'column',
         gap: 2
       }}
+      role="form"
+      aria-label="Signup form"
     >
-      <Typography variant="h5" component="h1" gutterBottom textAlign="center">
+      <Typography variant="h5" component="h1" gutterBottom textAlign="center" sx={{ mb: 1 }}>
         Create Account
+      </Typography>
+      <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mb: 3 }}>
+        Register for Planventure to start planning your next trip.
       </Typography>
 
       {error && (
@@ -148,6 +145,8 @@ const SignupForm = () => {
         helperText={formErrors.email}
         disabled={isLoading}
         required
+        autoComplete="email"
+        autoFocus
       />
 
       <TextField
@@ -161,18 +160,20 @@ const SignupForm = () => {
         helperText={formErrors.password}
         disabled={isLoading}
         required
+        autoComplete="new-password"
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
               <IconButton
-                aria-label="toggle password visibility"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
                 onClick={togglePasswordVisibility}
                 edge="end"
+                disabled={isLoading}
               >
                 {showPassword ? <VisibilityOff /> : <Visibility />}
               </IconButton>
             </InputAdornment>
-          ),
+          )
         }}
       />
 
@@ -187,6 +188,7 @@ const SignupForm = () => {
         helperText={formErrors.confirmPassword}
         disabled={isLoading}
         required
+        autoComplete="new-password"
       />
 
       <Button
@@ -195,16 +197,26 @@ const SignupForm = () => {
         color="primary"
         size="large"
         disabled={isLoading}
-        sx={{ mt: 2 }}
+        sx={{ mt: 2, position: 'relative' }}
+        startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
       >
         {isLoading ? 'Creating Account...' : 'Sign Up'}
       </Button>
 
       <Typography variant="body2" textAlign="center" sx={{ mt: 2 }}>
         Already have an account?{' '}
-        <RouterLink to="/login" style={{ textDecoration: 'none' }}>
+        <MuiLink
+          component="button"
+          variant="body2"
+          onClick={() => navigate('/login')}
+          sx={{
+            textDecoration: 'none',
+            fontWeight: 500,
+            '&:hover': { textDecoration: 'underline' }
+          }}
+        >
           Login
-        </RouterLink>
+        </MuiLink>
       </Typography>
     </Box>
   );

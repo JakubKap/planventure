@@ -22,6 +22,10 @@ export const authRoutes = [
   {
     path: '/signup',
     element: <SignUpPage />,
+  },
+  {
+    path: '/register',
+    element: <SignUpPage />,
   }
 ];
 
