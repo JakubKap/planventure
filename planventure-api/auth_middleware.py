@@ -15,8 +15,9 @@ def get_current_user() -> Optional[User]:
     """
     try:
         verify_jwt_in_request()
-        user_id = get_jwt_identity()
-        if user_id:
+        user_id_str = get_jwt_identity()
+        if user_id_str:
+            user_id = int(user_id_str)
             return User.query.get(user_id)
     except Exception:
         pass
@@ -125,8 +126,9 @@ def verify_request_auth() -> tuple[bool, Optional[User]]:
     """
     try:
         verify_jwt_in_request()
-        user_id = get_jwt_identity()
-        if user_id:
+        user_id_str = get_jwt_identity()
+        if user_id_str:
+            user_id = int(user_id_str)
             user = User.query.get(user_id)
             return True, user
     except Exception:

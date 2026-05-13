@@ -4,10 +4,11 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 
 from auth import auth_bp
+from auth_middleware import get_current_user, require_auth
 from config import Config
 from extensions import db, jwt
+from trips import trips_bp
 
-from auth_middleware import get_current_user, require_auth
 
 def create_app():
     app = Flask(__name__)
@@ -17,6 +18,7 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(trips_bp, url_prefix='/trips')
 
     @app.route('/')
     def home():
