@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
-import AuthLayout from './layouts/AuthLayout';
 import ProtectedRoute from './components/routing/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { homeRoutes, authRoutes, protectedRoutes } from './routes/routes';
@@ -24,16 +23,12 @@ function App() {
             />
           ))}
 
-          {/* Auth routes with AuthLayout */}
+          {/* Auth routes render pages that already include AuthLayout */}
           {authRoutes.map((route) => (
             <Route
               key={route.path}
               path={route.path}
-              element={
-                <AuthLayout>
-                  {route.element}
-                </AuthLayout>
-              }
+              element={route.element}
             />
           ))}
 
