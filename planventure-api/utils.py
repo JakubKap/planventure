@@ -1,5 +1,6 @@
 import hashlib
 import os
+import re
 from typing import Tuple
 
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -79,6 +80,14 @@ def verify_password_werkzeug(password: str, hashed_password: str) -> bool:
         True if password matches, False otherwise
     """
     return check_password_hash(hashed_password, password)
+
+
+EMAIL_VALIDATION_PATTERN = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+
+
+def is_valid_email(email: str) -> bool:
+    """Return True if the provided string is a valid email address."""
+    return bool(EMAIL_VALIDATION_PATTERN.match(email))
 
 
 # Convenience functions for common use cases
