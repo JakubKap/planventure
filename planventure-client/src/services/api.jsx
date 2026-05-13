@@ -1,4 +1,18 @@
 const BASE_URL = 'http://localhost:5000';
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -10,9 +24,50 @@ const getAuthHeaders = () => {
 
 const handleResponse = async (response) => {
   if (response.status === 401) {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
-    throw new Error('Session expired. Please login again.');
+    // Try to refresh token if not already refreshing
+    if (!isRefreshing) {
+      isRefreshing = true;
+      
+      try {
+        const refreshResponse = await fetch(`${BASE_URL}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          const newToken = refreshData.token || refreshData.access_token;
+          
+          localStorage.setItem('token', newToken);
+          processQueue(null, newToken);
+          isRefreshing = false;
+          
+          // Retry original request with new token
+          return fetch(response.url, {
+            ...response,
+            headers: { ...getAuthHeaders() }
+          }).then(handleResponse);
+        } else {
+          // Refresh failed, logout
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+          processQueue(new Error('Token refresh failed'), null);
+          isRefreshing = false;
+          throw new Error('Session expired. Please login again.');
+        }
+      } catch (err) {
+        processQueue(err, null);
+        isRefreshing = false;
+        throw err;
+      }
+    }
+
+    // While refreshing, queue this request
+    return new Promise((resolve, reject) => {
+      failedQueue.push({ resolve, reject });
+    });
   }
 
   if (response.status === 404) {

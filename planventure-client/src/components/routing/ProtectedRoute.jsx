@@ -1,23 +1,32 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { CircularProgress } from '@mui/material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
 
-  console.log('ProtectedRoute - Auth State:', { isAuthenticated, loading });
-
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          gap: 2
+        }}
+      >
         <CircularProgress />
-      </div>
+        <Typography variant="body2" color="text.secondary">
+          Loading...
+        </Typography>
+      </Box>
     );
   }
 
   if (!isAuthenticated) {
-    console.log('Not authenticated, redirecting to login...');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

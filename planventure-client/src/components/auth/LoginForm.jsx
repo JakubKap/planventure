@@ -20,7 +20,7 @@ import { authService } from '../../services/authService';
 const LoginForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, setIsAuthenticated } = useAuth();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
