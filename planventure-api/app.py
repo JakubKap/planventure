@@ -3,10 +3,11 @@ import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 
+from auth import auth_bp
 from config import Config
 from extensions import db, jwt
-from auth import auth_bp
 
+from auth_middleware import get_current_user, require_auth
 
 def create_app():
     app = Flask(__name__)
@@ -30,6 +31,15 @@ def create_app():
         return jsonify({
             "database_uri": app.config["SQLALCHEMY_DATABASE_URI"],
             "initialized": True,
+        })
+
+    @app.route('/protected')
+    @require_auth
+    def protected():
+        user = get_current_user()
+        return jsonify({
+            "message": "This is a protected route",
+            "user": user.to_dict() if user else None
         })
 
     return app
