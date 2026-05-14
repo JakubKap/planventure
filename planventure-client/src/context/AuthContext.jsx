@@ -56,7 +56,14 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.error('Logout API call failed:', err);
+      // Continue with client-side logout even if API call fails
+    }
+    
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setToken(null);

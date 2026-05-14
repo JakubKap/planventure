@@ -1,4 +1,4 @@
-import { AppBar, Box, Toolbar, Typography, Button, Stack } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -6,8 +6,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 

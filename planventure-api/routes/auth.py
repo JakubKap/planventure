@@ -68,3 +68,9 @@ def login():
         }), 200
     
     return jsonify(INVALID_CREDENTIALS)
+
+@auth_bp.route('/logout', methods=['POST'])
+def logout():
+    # For JWT, logout is typically handled client-side
+    # But we can provide an endpoint for consistency
+    return jsonify({'message': 'Logged out successfully'}), 200
